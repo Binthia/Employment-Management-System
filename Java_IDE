@@ -1,0 +1,97 @@
+package EmployeeManage;
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class Employee {
+    private static Connection conn;
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static Connection getConnection() throws SQLException {
+        String url = "jdbc:mysql://localhost:3306/java_practice"; 
+        String user = "root"; 
+        String password = "Binthia@3002"; 
+        return DriverManager.getConnection(url, user, password);
+    }
+
+    public static void registerUser() {
+        System.out.println("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.println("Enter password: ");
+        String password = scanner.nextLine();
+
+        try (Connection conn = getConnection()) {
+            String query = "INSERT INTO users (username, password) VALUES (?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, username);
+                stmt.setString(2, password); 
+                stmt.executeUpdate();
+                System.out.println("User registered successfully!");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static boolean loginUser(String username, String password) {
+        try (Connection conn = getConnection()) {
+            String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, username);
+                stmt.setString(2, password); 
+                ResultSet rs = stmt.executeQuery();
+                return rs.next(); 
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static void displayEmployeeDetails() {
+        try (Connection conn = getConnection()) {
+            String query = "SELECT * FROM employees"; 
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String name = rs.getString("name");
+                    String position = rs.getString("position");
+                    double salary = rs.getDouble("salary");
+                    System.out.println("ID: " + id + ", Name: " + name + ", Position: " + position + ", Salary: " + salary);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+     
+        System.out.println("1. Register");
+        System.out.println("2. Login");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); 
+
+        switch (choice) {
+            case 1:
+                registerUser(); 
+                break;
+            case 2:
+                System.out.println("Enter username: ");
+                String username = scanner.nextLine();
+                System.out.println("Enter password: ");
+                String password = scanner.nextLine();
+                if (loginUser(username, password)) {
+                    System.out.println("Login successful!");                  
+                    displayEmployeeDetails();
+                } else {
+                    System.out.println("Login failed!");
+                }
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+}
