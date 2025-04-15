@@ -4,7 +4,7 @@ def connect():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Binthia@3002",
+        password="Binthia",
         database="java_practice"  # Make sure this DB and required tables exist
     )
 
